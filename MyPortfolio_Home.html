@@ -79,20 +79,34 @@
   <!-- First Banner Section -->
   <main class="w-full bg-[#0D05F2] flex flex-col lg:flex-row justify-center items-center overflow-hidden px-4 sm:px-8 lg:px-[100px]">
     <!-- Mobile (Opening_Mobile) -->
-    <div data-property-1="Opening_Mobile" class="md:hidden w-full h-full px-[30px] pt-6 bg-[#0D05F2] overflow-hidden inline-flex flex-col justify-center items-start gap-[10.01px]">
-      <div class="w-[285.37px] flex flex-col justify-start items-start gap-[24.03px]">
-        <div class="w-full h-[97.13px] font-bebas-neue text-[109.14px] leading-none">Hello!</div>
-        <div class="w-[311.41px] h-[60.08px] font-open-sans font-light text-[22.03px]">
-          My name is Foteini and I am <br />a senior Creative designer.
-        </div>
-        <a href="MyPortfolio_Mywork.html" class="inline-flex items-center justify-center gap-[10.01px] bg-white rounded-[5.01px] px-[14.02px] py-[10.01px] text-[#3A3A3A] text-[14.02px] font-open-sans font-normal">
-          Explore My Work
-        </a>
-      </div>
-      <div class="w-[315px] h-[308px] relative">
-        <img src="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757170059/MyImage_Mobile_ppmyld.png" alt="Foteini Giannikou portrait (mobile)" class="absolute inset-0 w-full h-full object-cover rounded-[10px]" />
-      </div>
-    </div>
+    <div data-property-1="Opening_Mobile"
+     class="md:hidden w-full bg-[#0D05F2] px-4 pt-8 pb-0 flex flex-col items-center">
+  <div class="w-full max-w-[360px] flex flex-col items-start gap-6">
+    <h1 class="font-bebas-neue text-[#F2F2F2] leading-none
+               text-[clamp(48px,18vw,96px)]">
+      Hello!
+    </h1>
+
+    <p class="font-open-sans font-light text-[#F2F2F2]
+              text-[18px] sm:text-[20px] leading-relaxed break-words">
+      My name is Foteini and I am a Senior Creative Designer.
+    </p>
+
+    <a href="MyPortfolio_Mywork.html"
+       class="inline-flex items-center justify-center gap-2 bg-white
+              rounded-[5px] px-4 py-2 text-[#3A3A3A] text-[14px] font-open-sans
+              transition-transform duration-300 hover:scale-105">
+      Explore My Work
+    </a>
+  </div>
+
+  <!-- Image: no mt-6 so it sits flush -->
+  <div class="w-full max-w-[360px]">
+    <img src="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757170059/MyImage_Mobile_ppmyld.png"
+         alt="Foteini Giannikou portrait (mobile)"
+         class="w-full h-auto rounded-[10px] object-cover" />
+  </div>
+</div>
 
     <!-- Tablet (Opening_Tablet) -->
     <div data-property-1="Opening_Tablet" class="hidden md:inline-flex lg:hidden w-full h-full px-[100px] bg-[#0D05F2] overflow-hidden justify-start items-center gap-[10.01px]">
@@ -188,9 +202,9 @@
         <!-- Left: Image box -->
         <div class="relative w-full lg:w-[285px] h-auto lg:h-[560px] bg-[#D8D7FE] rounded-[10px] overflow-hidden">
           <picture class="block w-full h-auto">
-            <source srcset="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757170057/MyImage2_Desktop_a6e6au.png" media="(min-width: 1024px)" />
-            <source srcset="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757170060/MyImage2_Tablet_l8oeyp.png" media="(min-width: 768px)" />
-            <img class="w-full h-auto lg:h-full object-cover rounded-[10px]" src="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757170057/MyImage2_Mobile_shzy1h.png" alt="Foteini Giannikou portrait" />
+            <source srcset="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757367708/MyImage2_Desktop_n7uly1.jpg" media="(min-width: 1024px)" />
+            <source srcset="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757367708/MyImage2_Tablet_wqsnax.jpg" media="(min-width: 768px)" />
+            <img class="w-full h-auto lg:h-full object-cover rounded-[10px]" src="https://res.cloudinary.com/dpgfcfydj/image/upload/v1757367708/MyImage2_Mobile_b6jp6r.jpg" alt="Foteini Giannikou portrait" />
           </picture>
         </div>
         <!-- Right column -->
@@ -583,66 +597,120 @@
   })();
 
   /* ===== Work Carousel (unchanged) ===== */
-  (function () {
-    const track = document.getElementById("work-track");
-    const prevBtn = document.getElementById("prev-work");
-    const nextBtn = document.getElementById("next-work");
+  document.addEventListener('DOMContentLoaded', () => {
+  const track = document.getElementById('work-track');
+  const prevBtn = document.getElementById('prev-work');
+  const nextBtn = document.getElementById('next-work');
 
-    const originals = Array.from(track.children);
-    const realCount = originals.length;
+  if (!track || !prevBtn || !nextBtn) return;
 
-    const firstClone = originals[0].cloneNode(true);
-    firstClone.dataset.clone = "first";
-    const lastClone = originals[realCount - 1].cloneNode(true);
-    lastClone.dataset.clone = "last";
+  // Force our own transition so Tailwind classes don't interfere
+  const TRANSITION = 'transform 350ms ease-out';
+  track.style.willChange = 'transform';
+  track.style.transition = TRANSITION;
 
-    track.insertBefore(lastClone, track.firstElementChild);
-    track.appendChild(firstClone);
+  // 1) capture originals
+  const originals = Array.from(track.children);
+  const N = originals.length;
+  if (N === 0) return;
 
-    let index = 1;
-    let step = 0;
+  // 2) rebuild: [clones-left] + [originals] + [clones-right]
+  const leftFrag  = document.createDocumentFragment();
+  const rightFrag = document.createDocumentFragment();
+  // left = reverse clones (so visual order stays left->right)
+  for (let i = N - 1; i >= 0; i--) leftFrag.appendChild(originals[i].cloneNode(true));
+  for (let i = 0; i < N; i++)       rightFrag.appendChild(originals[i].cloneNode(true));
 
-    function getGapPx() {
-      const styles = getComputedStyle(track);
-      const gap = parseFloat(styles.gap || styles.columnGap || "0");
-      return isNaN(gap) ? 0 : gap;
+  track.prepend(leftFrag);
+  track.append(rightFrag);
+
+  // state
+  let index = N;         // start at the first item of the MIDDLE block
+  let step  = 0;         // width of one card + gap
+  let moving = false;
+  let queueDir = 0;      // queued click while animating
+
+  function gapPx(el) {
+    const s = getComputedStyle(el);
+    const g = parseFloat(s.gap || s.columnGap || '0');
+    return Number.isFinite(g) ? g : 0;
+  }
+
+  function measureStep() {
+    // after rebuild, the first REAL in middle block is at children[N]
+    const card = track.children[N];
+    const rect = card.getBoundingClientRect();
+    // round to avoid sub-pixel drift
+    step = Math.round(rect.width + gapPx(track));
+  }
+
+  function setNoTransition() { track.style.transition = 'none'; }
+  function setTransition()   { track.style.transition = TRANSITION; }
+
+  function applyTransform(i, withTransition = true) {
+    if (!step) return;
+    if (withTransition) setTransition(); else setNoTransition();
+    const x = -Math.round(i * step);
+    track.style.transform = `translate3d(${x}px,0,0)`;
+    if (!withTransition) { void track.offsetHeight; setTransition(); } // re-enable
+  }
+
+  function imagesReady() {
+    const imgs = track.querySelectorAll('img');
+    return Promise.all([...imgs].map(img =>
+      img.complete ? Promise.resolve() :
+      new Promise(res => { img.addEventListener('load', res, { once: true }); img.addEventListener('error', res, { once: true }); })
+    ));
+  }
+
+  function go(dir) {
+    if (moving) { queueDir = dir; return; }
+    moving = true;
+    index += dir;
+    applyTransform(index, true);
+  }
+
+  function next() { go(+1); }
+  function prev() { go(-1); }
+
+  track.addEventListener('transitionend', () => {
+    // if we scrolled into the left clone block (index < N) or right clone block (index >= 2N),
+    // snap back to the middle block at the equivalent slide
+    if (index < N) {
+      const offset = N;          // shift forward by N to land in middle
+      index += N;
+      applyTransform(index, false);
+    } else if (index >= 2 * N) {
+      const offset = -N;         // shift back by N to land in middle
+      index -= N;
+      applyTransform(index, false);
     }
+    moving = false;
 
-    function measureStep() {
-      const card = track.children[1];
-      const cardWidth = card.getBoundingClientRect().width;
-      step = cardWidth + getGapPx();
+    // process any queued fast-click
+    if (queueDir !== 0) {
+      const q = queueDir; queueDir = 0;
+      go(q);
     }
+  });
 
-    function setNoTransition() { track.style.transition = "none"; }
-    function restoreTransition() { track.style.transition = ""; }
-
-    function goToIndex(i, withTransition = true) {
-      if (!withTransition) setNoTransition();
-      track.style.transform = `translateX(${-i * step}px)`;
-      if (!withTransition) { void track.offsetHeight; restoreTransition(); }
-    }
-
-    function next() { index++; goToIndex(index, true); }
-    function prev() { index--; goToIndex(index, true); }
-
-    track.addEventListener("transitionend", () => {
-      const current = track.children[index];
-      if (!current) return;
-      if (current.dataset.clone === "first") { index = 1; goToIndex(index, false); }
-      else if (current.dataset.clone === "last") { index = realCount; goToIndex(index, false); }
-    });
-
-    function onResize() { measureStep(); goToIndex(index, false); }
-    window.addEventListener("resize", onResize);
-    window.addEventListener("load", onResize);
-
+  function onResize() {
+    const was = index;
     measureStep();
-    goToIndex(index, false);
+    applyTransform(was, false);
+  }
 
-    nextBtn.addEventListener("click", next);
-    prevBtn.addEventListener("click", prev);
-  })();
+  window.addEventListener('resize', onResize);
+
+  imagesReady().then(() => {
+    measureStep();
+    // align to first middle slide (index N)
+    applyTransform(index, false);
+  });
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+});
 </script>
 
 
